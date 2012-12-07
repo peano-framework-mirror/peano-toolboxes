@@ -31,7 +31,7 @@ class matrixfree::TimeStepper {
     double  _maxDifferenceFromTimeStepToTimeStepInHNorm;
     double  _timeInBetweenTwoSnapshots;
     double  _nextSnapshotIsDue;
-    bool    _writeSnapshot;
+    bool    _printInitialCondition;
   public:
     /**
      * @param maxDifferenceFromTimeStepToTimeStepInMaxNorm           0.0 to switch it off
@@ -42,7 +42,8 @@ class matrixfree::TimeStepper {
       double  initialTimeStepSize,
       double  maxDifferenceFromTimeStepToTimeStepInMaxNorm,
       double  maxDifferenceFromTimeStepToTimeStepInHNorm,
-      double  deltaInBetweenTwoSnapshots
+      double  deltaInBetweenTwoSnapshots,
+      bool    printInitialCondition
     );
 
     double getTime() const;

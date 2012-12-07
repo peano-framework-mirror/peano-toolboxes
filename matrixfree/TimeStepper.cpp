@@ -13,14 +13,16 @@ matrixfree::TimeStepper::TimeStepper(
   double  initialTimeStepSize,
   double  maxDifferenceFromTimeStepToTimeStepInMaxNorm,
   double  maxDifferenceFromTimeStepToTimeStepInHNorm,
-  double  deltaInBetweenTwoSnapshots
+  double  deltaInBetweenTwoSnapshots,
+  bool    printInitialSolution
 ):
   _time(0.0),
   _timeStepSize( initialTimeStepSize ),
   _maxDifferenceFromTimeStepToTimeStepInMaxNorm( maxDifferenceFromTimeStepToTimeStepInMaxNorm ),
   _maxDifferenceFromTimeStepToTimeStepInHNorm( maxDifferenceFromTimeStepToTimeStepInHNorm ),
   _timeInBetweenTwoSnapshots(deltaInBetweenTwoSnapshots),
-  _nextSnapshotIsDue(deltaInBetweenTwoSnapshots==0 ? std::numeric_limits<double>::max() : 0.0) {
+  _nextSnapshotIsDue(deltaInBetweenTwoSnapshots==0 ? std::numeric_limits<double>::max() : 0.0),
+  _printInitialCondition(printInitialSolution) {
   assertion1( _timeStepSize>=0.0, _timeStepSize );
 }
 
@@ -63,7 +65,7 @@ void matrixfree::TimeStepper::switchToNextTimeStep() {
 
 
 bool matrixfree::TimeStepper::shallWriteSnapshot() const {
-  return _time > _nextSnapshotIsDue;
+  return _printInitialCondition || _time > _nextSnapshotIsDue;
 }
 
 
@@ -75,6 +77,8 @@ void matrixfree::TimeStepper::wroteSnapshot() {
   while (_nextSnapshotIsDue<=_time) {
     _nextSnapshotIsDue += _timeInBetweenTwoSnapshots;
   }
+
+  _printInitialCondition = false;
 }
 
 
