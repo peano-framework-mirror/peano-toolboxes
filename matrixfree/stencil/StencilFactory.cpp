@@ -7,6 +7,7 @@ matrixfree::stencil::Stencil
 matrixfree::stencil::StencilFactory::exchangeCoordinates( const Stencil& stencil, int coord0, int coord1 ) {
   Stencil result;
 
+  #ifdef Dim3
   d3for3(destination)
     tarch::la::Vector<DIMENSIONS,int> source;
     source = destination;
@@ -14,6 +15,9 @@ matrixfree::stencil::StencilFactory::exchangeCoordinates( const Stencil& stencil
     source(coord1) = destination(coord0);
     result( peano::utils::dLinearised(destination,3) ) = stencil( peano::utils::dLinearised(source,3) );
   enddforx
+  #else
+  assertionMsg( false, "operation only supported for d=3" );
+  #endif
 
   return result;
 }
