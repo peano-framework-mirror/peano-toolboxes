@@ -30,7 +30,7 @@ tarch::la::Vector<TWO_POWER_D, double> matrixfree::solver::Multigrid::prolongCel
 
 	tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double> cellP = calculateCellInterGridTransferOperator(coarseGridVerticesP, fineGridVerticesPositions)*(1.0/TWO_POWER_D);
 
-	multiply(cellP, cellValues, result);
+	result = cellP * cellValues;
 
 	return result;
 }
@@ -44,7 +44,7 @@ tarch::la::Vector<TWO_POWER_D, double> matrixfree::solver::Multigrid::restrictCe
 
 	tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double> cellR = calculateCellInterGridTransferOperator(coarseGridVerticesR, fineGridVerticesPositions)*(1.0/TWO_POWER_D);
 
-	multiply(transpose(cellR), cellValues, result);
+	result = transpose(cellR) * cellValues;
 
 	return result;
 }
@@ -232,8 +232,8 @@ tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double> matrixfree::solver::Multigri
 	tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double> result;
 
 	tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double> cellAP;
-	multiply(elementWiseAssemblyMatrix, cellP, cellAP);
-	multiply(transpose(cellR), cellAP, result);
+	cellAP = elementWiseAssemblyMatrix * cellP;
+	result = transpose(cellR) * cellAP;
 
 	return result;
 }

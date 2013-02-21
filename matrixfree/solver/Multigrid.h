@@ -5,10 +5,8 @@
 
 #include "tarch/logging/Log.h"
 #include "tarch/la/Vector.h"
-#include "tarch/la/TransposedMatrix.h"
 #include "tarch/la/Matrix.h"
 #include "tarch/la/GramSchmidt.h"
-#include "tarch/la/WrappedVector.h"
 #include "peano/utils/Globals.h"
 #include "peano/utils/Loop.h"
 #include "peano/grid/VertexEnumerator.h"

@@ -100,7 +100,7 @@ matrixfree::solver::SurplusCalculator::SurplusCalculator (
   matrixfree::stencil::ElementMatrix elementMatrix;
 
   #ifdef Dim2
-  tarch::la::assign(_elementMatrix[0]) =
+  _elementMatrix[0] =
     elementMatrix.getElementWiseAssemblyMatrix(
       matrixfree::stencil::StencilFactory::stencilProduct(
         meanValueStencil,
