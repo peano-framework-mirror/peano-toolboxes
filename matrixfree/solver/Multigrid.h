@@ -44,9 +44,11 @@ class matrixfree::solver::Multigrid {
     int                                     _numberOfStencilEvaluations;
 
   public:
-
     Multigrid();
+    Multigrid(const Multigrid& masterThread);
     virtual ~Multigrid();
+
+    void mergeWithWorkerThread(const Multigrid& workerThread);
 
     void setup();
 
@@ -259,26 +261,33 @@ class matrixfree::solver::Multigrid {
     );
 
     static int getPositionInCellInterGridTransferOperatorVector(
-        const int coarseGridVertexNumber,
-        const int positionInOperator);
+      const int coarseGridVertexNumber,
+      const int positionInOperator
+    );
+
 
     static int getPositionInCellStencilVector(
-        const int coarseGridVertexNumber,
-        const int positionInOperator);
+      const int coarseGridVertexNumber,
+      const int positionInOperator
+    );
+
 
     tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D, double> addUpdateToStencils(
-    	tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D, double>&		verticesStencils,
-    	tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double> 			cellWiseStencilUpdate
-    );
+    	const tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D, double>&		verticesStencils,
+    	const tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double>&          cellWiseStencilUpdate
+    ) const;
+
 
     tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double> fillInIntergridTransferOperators(
-        tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D,double> operators3x3,
-        tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double> operators5x5
-    );
+      const tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D,double>&  operators3x3,
+      const tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double>&  operators5x5
+    ) const;
+
 
     static tarch::la::Vector<TWO_POWER_D, int> getPositionsInA(
     	const int coarseVertexNumber
     );
+
 
     static tarch::la::Vector<THREE_POWER_D, int> getPositionsInIntergridTransferOperator(
       const int coarseVertexNumber

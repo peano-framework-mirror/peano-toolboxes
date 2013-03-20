@@ -13,12 +13,26 @@ matrixfree::solver::Multigrid::Multigrid():
   _numberOfStencilEvaluations(0){
 }
 
+
 matrixfree::solver::Multigrid::~Multigrid() {
 }
 
 
+matrixfree::solver::Multigrid::Multigrid(const Multigrid& workerThread):
+  _dLinearInterpolation( workerThread._dLinearInterpolation ),
+  _numberOfStencilEvaluations(0) {
+}
+
+
+void matrixfree::solver::Multigrid::mergeWithWorkerThread(const Multigrid& workerThread) {
+  _numberOfStencilEvaluations += workerThread._numberOfStencilEvaluations;
+}
+
+
+
 void matrixfree::solver::Multigrid::setup() {
 }
+
 
 tarch::la::Vector<TWO_POWER_D, double> matrixfree::solver::Multigrid::prolongCellValues(
 	    const tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double>&	coarseGridVerticesP,
@@ -678,6 +692,7 @@ tarch::la::Vector<4, double> matrixfree::solver::Multigrid::solve4x4System(
   return result;
 }
 
+
 int matrixfree::solver::Multigrid::getNumberOfStencilUpdates() const {
   return _numberOfStencilEvaluations;
 }
@@ -687,51 +702,43 @@ void matrixfree::solver::Multigrid::clearNumberOfStencilUpdates() {
   _numberOfStencilEvaluations = 0;
 }
 
-tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D, double> matrixfree::solver::Multigrid::addUpdateToStencils(
-	tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D, double>&		verticesStencils,
-	tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double>   			cellWiseStencilUpdate
-){
 
+tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D, double> matrixfree::solver::Multigrid::addUpdateToStencils(
+	const tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D, double>&	 verticesStencils,
+	const tarch::la::Matrix<TWO_POWER_D, TWO_POWER_D, double>&         cellWiseStencilUpdate
+) const {
 	tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D, double> result = verticesStencils;
 
 	dfor2(c) //Run over coarse vertices of the cell
-
 		tarch::la::Vector<TWO_POWER_D, int> positionsInA = getPositionsInA(cScalar);
-
 		dfor2(f) //Run over fine vertices (i.e., rows of the four times four cell-wise stencil update and at the same time entries of positionsInA)
-
-				int vertexIndex = cScalar*THREE_POWER_D + positionsInA(fScalar); //index in verticesStencils
-				result(vertexIndex) = result(vertexIndex) + cellWiseStencilUpdate(cScalar, fScalar);
-
+			int vertexIndex = cScalar*THREE_POWER_D + positionsInA(fScalar); //index in verticesStencils
+			result(vertexIndex) = result(vertexIndex) + cellWiseStencilUpdate(cScalar, fScalar);
 		enddforx
-
 	enddforx
 
 	return result;
 }
 
-tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double> matrixfree::solver::Multigrid::fillInIntergridTransferOperators(
-    tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D,double> operators3x3,
-    tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double> operators5x5
-){
 
+tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double> matrixfree::solver::Multigrid::fillInIntergridTransferOperators(
+  const tarch::la::Vector<TWO_POWER_D_TIMES_THREE_POWER_D,double>&  operators3x3,
+  const tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double>&  operators5x5
+) const {
   tarch::la::Vector<TWO_POWER_D_TIMES_FIVE_POWER_D, double> result = operators5x5;
 
   dfor2(c) //Run over coarse vertices of the cell
-
     tarch::la::Vector<THREE_POWER_D, int> positionsInOperator = getPositionsInIntergridTransferOperator(cScalar);
-
     for(int i = 0; i<THREE_POWER_D; i++){
       int vertexIndex = cScalar*FIVE_POWER_D + positionsInOperator(i);
       double value = operators3x3(cScalar*THREE_POWER_D + i);
       result(vertexIndex) = value;
     }
-
   enddforx
 
   return result;
-
 }
+
 
 tarch::la::Vector<TWO_POWER_D, int> matrixfree::solver::Multigrid::getPositionsInA(
 		const int coarseVertexNumber
