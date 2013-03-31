@@ -242,7 +242,7 @@ int mpibalancing::FairNodePoolStrategy::reserveNode(int forMaster) {
 void mpibalancing::FairNodePoolStrategy::updateNodeWeights() {
   const double reductionOfWeights = 1.0 / (getNumberOfRegisteredNodes() - getNumberOfIdleNodes() + 1.0);
   for (NodeContainer::iterator p=_nodes.begin(); p!=_nodes.end(); p++ ) {
-    p->reduceNumberOfBookedWorkers(reductionOfWeights);
+    p->reduceNumberOfBookedWorkers();
   }
 }
 
@@ -315,7 +315,10 @@ bool mpibalancing::FairNodePoolStrategy::NodePoolListEntry::isIdle() const {
 
 
 bool mpibalancing::FairNodePoolStrategy::NodePoolListEntry::operator<( const mpibalancing::FairNodePoolStrategy::NodePoolListEntry& than ) const {
-  return isIdle() && !than.isIdle();
+  bool moveIdleToSmaller = isIdle() && !than.isIdle();
+  bool orderRanks        = (isIdle()==than.isIdle()) && (_rank < than._rank);
+
+  return moveIdleToSmaller || orderRanks;
 }
 
 
@@ -329,10 +332,7 @@ int mpibalancing::FairNodePoolStrategy::NodePoolListEntry::getNumberOfBookedWork
 }
 
 
-void mpibalancing::FairNodePoolStrategy::NodePoolListEntry::reduceNumberOfBookedWorkers(double value) {
-  assertion( value>=0.0 );
-  _bookedWorkers -= value;
-  if (_bookedWorkers<0.0) {
-    _bookedWorkers = 0.0;
-  }
+void mpibalancing::FairNodePoolStrategy::NodePoolListEntry::reduceNumberOfBookedWorkers() {
+  _bookedWorkers /= 2.0;
+  assertion( _bookedWorkers>=0.0 );
 }

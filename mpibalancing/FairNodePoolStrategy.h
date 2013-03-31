@@ -132,7 +132,10 @@ class mpibalancing::FairNodePoolStrategy: public tarch::parallel::NodePoolStrate
          */
         void addNewWorker();
 
-        void reduceNumberOfBookedWorkers(double value);
+        /**
+         * Halves all the entries
+         */
+        void reduceNumberOfBookedWorkers();
 
         int getNumberOfBookedWorkers() const;
     };
