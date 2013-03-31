@@ -1,5 +1,6 @@
 #include "mpibalancing/FairNodePoolStrategy.h"
 
+#include <cstdlib>
 
 #include <sstream>
 #include <limits>
@@ -8,10 +9,11 @@
 tarch::logging::Log mpibalancing::FairNodePoolStrategy::_log( "mpibalancing::FairNodePoolStrategy" );
 
 
-mpibalancing::FairNodePoolStrategy::FairNodePoolStrategy():
+mpibalancing::FairNodePoolStrategy::FairNodePoolStrategy(double waitTimeOutSec):
   NodePoolStrategy(),
   _tag(-1),
-  _nodes() {
+  _nodes(),
+  _waitTimeOut(waitTimeOutSec) {
 }
 
 
@@ -21,8 +23,17 @@ mpibalancing::FairNodePoolStrategy::~FairNodePoolStrategy() {
 
 void mpibalancing::FairNodePoolStrategy::fillWorkerRequestQueue(RequestQueue& queue) {
   #ifdef Parallel
+  double waitTimeout = clock() + _waitTimeOut * CLOCKS_PER_SEC;
   assertion( _tag >= 0 );
-  while ( tarch::parallel::messages::WorkerRequestMessage::isMessageInQueue(_tag, true) ) {
+
+  const int NumberOfRequestsThreshold = (getNumberOfRegisteredNodes() - getNumberOfIdleNodes()) /2 +1;
+  while (
+    tarch::parallel::messages::WorkerRequestMessage::isMessageInQueue(_tag, true)
+    &&
+    clock() < waitTimeout
+    &&
+    static_cast<int>(queue.size()) < NumberOfRequestsThreshold
+  ) {
     tarch::parallel::messages::WorkerRequestMessage message;
     message.receive(MPI_ANY_SOURCE,_tag, true);
     queue.push_back( message );
@@ -240,7 +251,6 @@ int mpibalancing::FairNodePoolStrategy::reserveNode(int forMaster) {
 
 
 void mpibalancing::FairNodePoolStrategy::updateNodeWeights() {
-  const double reductionOfWeights = 1.0 / (getNumberOfRegisteredNodes() - getNumberOfIdleNodes() + 1.0);
   for (NodeContainer::iterator p=_nodes.begin(); p!=_nodes.end(); p++ ) {
     p->reduceNumberOfBookedWorkers();
   }

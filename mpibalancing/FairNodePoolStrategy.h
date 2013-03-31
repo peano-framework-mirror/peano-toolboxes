@@ -163,6 +163,8 @@ class mpibalancing::FairNodePoolStrategy: public tarch::parallel::NodePoolStrate
      */
     NodeContainer _nodes;
 
+    double _waitTimeOut;
+
     void logQueue( const RequestQueue& queue ) const;
 
     int getWorkersOfNode( int rank ) const;
@@ -174,7 +176,7 @@ class mpibalancing::FairNodePoolStrategy: public tarch::parallel::NodePoolStrate
    *
    * Construct all the attributes.
    */
-    FairNodePoolStrategy();
+    FairNodePoolStrategy(double waitTimeOutSec = 1.0);
     virtual ~FairNodePoolStrategy();
 
     virtual void setNodePoolTag(int tag);
