@@ -23,16 +23,10 @@ mpibalancing::FairNodePoolStrategy::~FairNodePoolStrategy() {
 
 void mpibalancing::FairNodePoolStrategy::fillWorkerRequestQueue(RequestQueue& queue) {
   #ifdef Parallel
-  double waitTimeout = clock() + _waitTimeOut * CLOCKS_PER_SEC;
   assertion( _tag >= 0 );
 
-  const int NumberOfRequestsThreshold = (getNumberOfRegisteredNodes() - getNumberOfIdleNodes()) /2 +1;
   while (
     tarch::parallel::messages::WorkerRequestMessage::isMessageInQueue(_tag, true)
-    &&
-    clock() < waitTimeout
-    &&
-    static_cast<int>(queue.size()) < NumberOfRequestsThreshold
   ) {
     tarch::parallel::messages::WorkerRequestMessage message;
     message.receive(MPI_ANY_SOURCE,_tag, true);

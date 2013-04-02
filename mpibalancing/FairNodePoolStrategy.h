@@ -170,6 +170,8 @@ class mpibalancing::FairNodePoolStrategy: public tarch::parallel::NodePoolStrate
     int getWorkersOfNode( int rank ) const;
 
     void updateNodeWeights();
+
+    bool continueToFillRequestQueue(int queueSize) const;
   public:
   /**
    * Constructor
