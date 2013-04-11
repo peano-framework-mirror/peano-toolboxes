@@ -25,12 +25,21 @@ void mpibalancing::FairNodePoolStrategy::fillWorkerRequestQueue(RequestQueue& qu
   #ifdef Parallel
   assertion( _tag >= 0 );
 
-  while (
-    tarch::parallel::messages::WorkerRequestMessage::isMessageInQueue(_tag, true)
-  ) {
-    tarch::parallel::messages::WorkerRequestMessage message;
-    message.receive(MPI_ANY_SOURCE,_tag, true);
-    queue.push_back( message );
+  const std::clock_t waitTimeoutTimeStamp = clock() + static_cast<std::clock_t>(std::floor(_waitTimeOut * CLOCKS_PER_SEC));
+
+  bool continueToWait = true;
+  while ( continueToWait ) {
+    continueToWait = false;
+    if (tarch::parallel::messages::WorkerRequestMessage::isMessageInQueue(_tag, true)) {
+      tarch::parallel::messages::WorkerRequestMessage message;
+      message.receive(MPI_ANY_SOURCE,_tag, true);
+      queue.push_back( message );
+      continueToWait = true;
+    }
+
+    continueToWait |=
+        (static_cast<int>(queue.size())+1 < getNumberOfRegisteredNodes()-getNumberOfIdleNodes()) &&
+        (clock() < waitTimeoutTimeStamp);
   }
   #endif
 }
