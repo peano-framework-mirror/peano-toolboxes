@@ -67,9 +67,9 @@ tarch::parallel::messages::WorkerRequestMessage mpibalancing::FairNodePoolStrate
   assertion( !queue.empty() );
 
   RequestQueue::iterator pResultInQueue;
-  int                    workersOfRankCurrentlyAnswered = std::numeric_limits<int>::max();
 
   #ifdef Parallel
+  int                    workersOfRankCurrentlyAnswered = std::numeric_limits<int>::max();
   for (RequestQueue::iterator p = queue.begin(); p != queue.end(); p++) {
     if (getWorkersOfNode(p->getSenderRank()) < workersOfRankCurrentlyAnswered) {
       workersOfRankCurrentlyAnswered = getWorkersOfNode(p->getSenderRank());
