@@ -1,0 +1,11 @@
+/**
+
+ @dir "Shared Memory Oracles"
+  
+ To recreate the archive, please change into the toolboxes directory and type in
+ \code
+  tar -cvf sharedmemoryoracles.tar sharedmemoryoracles --exclude=.svn
+  gzip sharedmemoryoracles.tar
+ \endcode
+
+ */ 
